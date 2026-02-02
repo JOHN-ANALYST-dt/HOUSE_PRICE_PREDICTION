@@ -105,6 +105,41 @@ st.markdown("""
         color: #9ca3af; /* Muted icon color from image */
         font-size: 1rem;
     }
+            .calc-container {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 15px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .cost-card {
+        background: #f8fafc;
+        border-left: 5px solid #D4AF37;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+    .cost-label {
+        color: #64748b;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+    .cost-value {
+        color: #003366;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 5px 0;
+    }
+    .total-box {
+        background: linear-gradient(135deg, #003366 0%, #002244 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 12px;
+        text-align: center;
+    }
+    
     </style>
 """, unsafe_allow_html=True)
 
@@ -209,50 +244,64 @@ with st.container(border=True):
 st.markdown("<br>", unsafe_allow_html=True)
 st.markdown("---")
 
-# --- EXPENSES SECTION ---
-st.markdown('<div id="expenses"></div>', unsafe_allow_html=True)
-st.header("🏗️ Construction Expense Calculator")
-st.write("A detailed breakdown of building costs for residential units.")
+# --- CALCULATOR LOGIC & UI ---
+st.markdown('<div id="expenses" style="padding-top: 50px;"></div>', unsafe_allow_html=True)
+st.header("🏗️ Construction Cost Calculator")
+st.write("Estimate your total build cost based on 2026 Kenyan material and labor indices.")
 
-ex_col1, ex_col2 = st.columns([2, 3])
-with ex_col1:
-    base_cost = size * 4500 # KES per SqFt estimation
-    expense_data = {
-        "Foundation": base_cost * 0.15,
-        "Superstructure (Walls)": base_cost * 0.30,
-        "Roofing": base_cost * 0.15,
-        "Electrical/Plumbing": base_cost * 0.20,
-        "Finishes & Labor": base_cost * 0.20
-    }
-    st.table(pd.DataFrame(expense_data.items(), columns=["Phase", "Cost (KES)"]))
+with st.container():
+    col_input, col_output = st.columns([1, 1.2], gap="large")
 
-with ex_col2:
-    fig_ex = go.Figure(data=[go.Pie(labels=list(expense_data.keys()), values=list(expense_data.values()), hole=.4)])
-    fig_ex.update_layout(title="Structural Cost Allocation", margin=dict(t=50, b=0, l=0, r=0))
-    st.plotly_chart(fig_ex, use_container_with_width=True)
+    with col_input:
+        st.subheader("Build Parameters")
+        with st.container(border=True):
+            # Market rates (per m2) for 2026
+            build_type = st.selectbox("Standard of Finish", 
+                ["Standard (Budget)", "Middle-Class", "Luxurious (Premium)"], 
+                help="Determines the quality of tiles, fittings, and cabinetry.")
+            
+            sqm = st.number_input("Total Floor Area (sq. meters)", min_value=30, value=120, step=10)
+            levels = st.radio("Number of Floors", ["Single Storey (Bungalow)", "Multi-Storey (Maisonette)"], horizontal=True)
+            
+            # Base rates mapping (KES per sqm)
+            rates = {"Standard (Budget)": 42000, "Middle-Class": 60000, "Luxurious (Premium)": 85000}
+            base_rate = rates[build_type]
+            
+            # Additional factor for multi-storey (structural slabs/stairs)
+            multiplier = 1.15 if "Multi-Storey" in levels else 1.0
+            total_estimate = sqm * base_rate * multiplier
+
+    with col_output:
+        st.subheader("Budget Breakdown")
+        
+        # Breakdown calculation
+        breakdown = {
+            "Substructure (Foundation)": total_estimate * 0.18,
+            "Walling & Superstructure": total_estimate * 0.32,
+            "Roofing & Ceiling": total_estimate * 0.15,
+            "Finishes (Tiles, Paint, Joinery)": total_estimate * 0.25,
+            "Electrical & Plumbing": total_estimate * 0.10
+        }
+
+        # Display formatted cards
+        for item, cost in breakdown.items():
+            st.markdown(f"""
+                <div class="cost-card">
+                    <div class="cost-label">{item}</div>
+                    <div class="cost-value">KES {cost:,.0f}</div>
+                </div>
+            """, unsafe_allow_html=True)
+
+        # Total Highlight
+        st.markdown(f"""
+            <div class="total-box">
+                <div style="opacity: 0.8; font-size: 0.9rem;">PROJECTED TOTAL COST</div>
+                <div style="font-size: 2.5rem; font-weight: 800;">KES {total_estimate:,.0f}</div>
+                <div style="font-size: 0.8rem; margin-top: 10px;">*Estimate includes materials, labor, and basic site prelims.</div>
+            </div>
+        """, unsafe_allow_html=True)
 
 st.markdown("---")
-
-# --- MATERIAL FORECAST SECTION ---
-st.markdown('<div id="material-forecast"></div>', unsafe_allow_html=True)
-st.header("📉 Material Price Forecast (10-Year Trend)")
-st.info("Interactive time-series analysis for core construction materials.")
-
-years = list(range(2025, 2036))
-cement_prices = [750 * (1.06**i) for i in range(len(years))]
-steel_prices = [145 * (1.08**i) for i in range(len(years))]
-iron_prices = [1200 * (1.07**i) for i in range(len(years))]
-
-fig_trend = go.Figure()
-fig_trend.add_trace(go.Scatter(x=years, y=cement_prices, name="Cement (Bag)", line=dict(color='#003366', width=3)))
-fig_trend.add_trace(go.Scatter(x=years, y=steel_prices, name="Steel (KG)", line=dict(color='#D4AF37', width=3)))
-fig_trend.add_trace(go.Scatter(x=years, y=iron_prices, name="Iron Sheets (G30)", line=dict(color='#ef4444', width=3)))
-
-fig_trend.update_layout(xaxis_title="Year", yaxis_title="Price (KES)", template="plotly_white", height=450)
-st.plotly_chart(fig_trend, use_container_with_width=True)
-
-st.markdown("---")
-
 # --- LOCATION SECTION ---
 st.markdown('<div id="location"></div>', unsafe_allow_html=True)
 st.header("📍 Location-Based Pricing")
