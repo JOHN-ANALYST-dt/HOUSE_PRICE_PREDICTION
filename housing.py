@@ -121,8 +121,13 @@ st.markdown("""
 
 
 # --- PRICE PREDICTOR SECTION ---
+
 st.markdown('<div id="price-predictor"></div>', unsafe_allow_html=True)
-st.header("🏠 House Price Predictor")
+st.header("🏠 House Price Predictionr")
+st.markdown("""
+    <h2 class="predict-h2">Predict Your Dream Home's Price</h2>
+    <h3 class="predict-h3">Enter your property requirements and get an accurate price prediction based on current market data and ML models.</h3>
+""", unsafe_allow_html=True)
 col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
