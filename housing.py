@@ -55,7 +55,7 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         text-align: center;
     }
-            .ai-banner {
+    .ai-banner {
         background-color: #f8fafc;
         text-align: center;
         padding: 10px 0;
@@ -64,6 +64,15 @@ st.markdown("""
         font-weight: 600;
         color: #1e293b;
         letter-spacing: 0.5px;
+    }
+    .ai-dot {
+        height: 8px;
+        width: 8px;
+        background-color: #10b981;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
+        box-shadow: 0 0 8px #10b981;
     }
     </style>
 """, unsafe_allow_html=True)
