@@ -55,6 +55,16 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         text-align: center;
     }
+            .ai-banner {
+        background-color: #f8fafc;
+        text-align: center;
+        padding: 10px 0;
+        border-bottom: 2px solid #D4AF37;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #1e293b;
+        letter-spacing: 0.5px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -68,6 +78,12 @@ st.markdown(f"""
         <a class="nav-item" href="#location">Location</a>
     </div>
 """, unsafe_allow_html=True)
+st.markdown("""
+    <div class="ai-banner">
+        <span class="ai-dot"></span> AI-Powered Predictions • 2000-2025 Historical Data
+    </div>
+""", unsafe_allow_html=True)
+
 
 # --- MODEL LOADING ---
 @st.cache_resource
@@ -92,6 +108,7 @@ st.markdown("""
         </div>
     </div>
 """, unsafe_allow_html=True)
+
 
 # --- PRICE PREDICTOR SECTION ---
 st.markdown('<div id="price-predictor"></div>', unsafe_allow_html=True)
