@@ -74,12 +74,6 @@ st.markdown("""
         margin-right: 8px;
         box-shadow: 0 0 8px #10b981;
     }
-    .predict-h2 {
-        color: #003366; font-size: 2.2rem; font-weight: 700; margin-bottom: 8px;
-    }
-    .predict-h3 {
-        color: #64748b; font-size: 1.1rem; font-weight: 400; line-height: 1.5; margin-bottom: 35px;
-    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -129,37 +123,59 @@ st.markdown("""
 # --- PRICE PREDICTOR SECTION ---
 
 st.markdown('<div id="price-predictor"></div>', unsafe_allow_html=True)
-st.header("🏠 House Price Predictionr")
+st.header("🏠 House Price Prediction")
 st.markdown("""
     <h2 class="predict-h2">Predict Your Dream Home's Price</h2>
     <h3 class="predict-h3">Enter your property requirements and get an accurate price prediction based on current market data and ML models.</h3>
 """, unsafe_allow_html=True)
-col1, col2 = st.columns([1, 1], gap="large")
+# --- PROPERTY DETAILS SECTION ---
 
-with col1:
-    st.subheader("Property Qualifications")
-    with st.container(border=True):
-        town = st.selectbox("Select Town/City", ["Nairobi", "Mombasa", "Kiambu", "Nakuru", "Kisumu", "Eldoret"])
-        size = st.number_input("Property Size (SqFt)", value=1500)
-        beds = st.slider("Bedrooms", 1, 10, 3)
-        baths = st.slider("Bathrooms", 1, 8, 2)
+with st.container(border=True):
+    # Main Section Heading with Icon
+    st.markdown("""
+        <div class="section-header">
+            <i class="far fa-list-alt"></i>
+            <h2>Property Details</h2>
+        </div>
+    """, unsafe_allow_html=True)
 
-with col2:
-    st.subheader("Valuation Result")
-    if model:
-        # Dummy vector mapping for example - Replace with actual model feature order
-        features = np.array([[size, beds, baths, 2025]]) 
-        prediction = model.predict(features)[0]
-        st.markdown(f"""
-            <div class="metric-card" style="margin-top: 20px;">
-                <p style="color: #64748b; margin-bottom: 5px;">Estimated Market Value</p>
-                <h1 style="color: #003366; font-size: 3rem;">KES {prediction:,.2f}</h1>
-                <p style="color: #D4AF37; font-weight: 600;">Prediction based on current {town} market indices.</p>
-            </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.error("Model engine 'rf_GRB_Model3.pkl' not found.")
+    # First Row: Region and Area
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown('<div class="field-label"><i class="fas fa-map-marker-alt"></i> Region/County</div>', unsafe_allow_html=True)
+        region = st.selectbox("", ["Nairobi", "Kiambu", "Mombasa", "Nakuru", "Machakos"], index=None, placeholder="Select region", key="reg")
+    
+    with col2:
+        st.markdown('<div class="field-label">Area/Neighborhood</div>', unsafe_allow_html=True)
+        area = st.selectbox("", ["Westlands", "Kilimani", "Karen", "Runda", "Thika"], index=None, placeholder="Select area", key="area")
 
+    # Second Row: Property Type and Size
+    col3, col4 = st.columns(2)
+    with col3:
+        st.markdown('<div class="field-label"><i class="fas fa-home"></i> Property Type</div>', unsafe_allow_html=True)
+        p_type = st.selectbox("", ["Apartment", "Bungalow", "Mansionette", "Townhouse"], index=None, placeholder="Select type", key="ptype")
+    
+    with col4:
+        st.markdown('<div class="field-label"><i class="fas fa-ruler-combined"></i> Size (sq ft)</div>', unsafe_allow_html=True)
+        size = st.text_input("", placeholder="e.g., 2500", key="psize")
+
+    # Third Row: Bedrooms and Bathrooms
+    col5, col6 = st.columns(2)
+    with col5:
+        st.markdown('<div class="field-label"><i class="fas fa-bed"></i> Bedrooms</div>', unsafe_allow_html=True)
+        beds = st.selectbox("", ["1", "2", "3", "4", "5+"], index=None, placeholder="Select", key="pbeds")
+    
+    with col6:
+        st.markdown('<div class="field-label"><i class="fas fa-bath"></i> Bathrooms</div>', unsafe_allow_html=True)
+        baths = st.selectbox("", ["1", "2", "3", "4+"], index=None, placeholder="Select", key="pbaths")
+
+    # Fourth Row: Parking Spaces
+    col7, _ = st.columns(2)
+    with col7:
+        st.markdown('<div class="field-label"><i class="fas fa-car"></i> Parking Spaces</div>', unsafe_allow_html=True)
+        parking = st.selectbox("", ["1", "2", "3+"], index=None, placeholder="Select", key="park")
+
+st.markdown("<br>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- EXPENSES SECTION ---
