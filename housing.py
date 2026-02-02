@@ -128,7 +128,7 @@ st.markdown("""
 # --- SIDEBAR: INPUTS & UPLOADS ---
 with st.sidebar:
     st.markdown("### <i class='fas fa-upload'></i> Model Assets", unsafe_allow_html=True)
-    model_file = st.file_uploader("Upload Model (.pkl, .joblib)", type=['pkl', 'joblib'])
+    model_file = st.file_uploader("rf_GRB_Model3.pkl", type=['pkl', 'joblib'])
     meta_file = st.file_uploader("Upload Training CSV (Optional Metadata)", type=['csv'])
     
     st.markdown("---")
