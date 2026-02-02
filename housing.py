@@ -74,6 +74,37 @@ st.markdown("""
         margin-right: 8px;
         box-shadow: 0 0 8px #10b981;
     }
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #1a472a; /* Dark Greenish Tint from image */
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 25px;
+    }
+    .section-header i {
+        font-size: 1.5rem;
+    }
+    .section-header h2 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+    }
+    
+    /* Label with Icons styling */
+    .field-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: -15px; /* Adjusting for Streamlit widget spacing */
+        font-size: 0.95rem;
+    }
+    .field-label i {
+        color: #9ca3af; /* Muted icon color from image */
+        font-size: 1rem;
+    }
     </style>
 """, unsafe_allow_html=True)
 
