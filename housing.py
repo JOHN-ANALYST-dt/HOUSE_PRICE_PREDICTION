@@ -74,6 +74,12 @@ st.markdown("""
         margin-right: 8px;
         box-shadow: 0 0 8px #10b981;
     }
+    .predict-h2 {
+        color: #003366; font-size: 2.2rem; font-weight: 700; margin-bottom: 8px;
+    }
+    .predict-h3 {
+        color: #64748b; font-size: 1.1rem; font-weight: 400; line-height: 1.5; margin-bottom: 35px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
