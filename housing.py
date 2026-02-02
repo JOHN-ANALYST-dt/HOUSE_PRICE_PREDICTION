@@ -108,7 +108,7 @@ model = load_bundle()
 st.markdown('<div id="kenya-house"></div>', unsafe_allow_html=True)
 st.markdown("""
     <div class="hero-container">
-        <h1 style='font-weight:700; font-size: 2.8rem;'>KenyaHomes Intelligence</h1>
+        <h1 style='font-weight:700; font-size: 2.8rem;color:white;'>KenyaHomes Intelligence</h1>
         <p style='font-size: 1.2rem; opacity: 0.9;'>Trusted ensemble predictions for Kenya's leading developers and home buyers.</p>
         <div style="display: flex; justify-content: center; gap: 60px; margin-top: 30px;">
             <div><h2 style='margin-bottom:0;'>47+</h2><p>Counties</p></div>
