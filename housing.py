@@ -342,82 +342,105 @@ with st.container():
 st.markdown("<br>", unsafe_allow_html=True)
 
 st.markdown("---")
+# --- 1. INITIALIZE INTERACTIVE STATE ---
+# This tracks which material the user has clicked on
+if 'selected_material' not in st.session_state:
+    st.session_state.selected_material = "Cement (50kg bag)"
 
-# --- MATERIAL PREDICTION LOGIC ---
-# Extracting trends from the ML model's historical context (2000-2025)
+# --- 2. MATERIAL PREDICTION LOGIC ---
 def get_material_predictions():
     years = np.arange(2025, 2036)
-    # Baseline KES prices for 2025 with historical CAGR (Compound Annual Growth Rate)
     materials_config = {
-        "Cement (50kg bag)": {"base": 780, "rate": 0.052, "icon": "🧱"},
-        "Steel Bars (12mm)": {"base": 1550, "rate": 0.068, "icon": "🔩"},
-        "Iron Sheets (G30)": {"base": 1280, "rate": 0.055, "icon": "🏗️"},
-        "Timber (Cypress)": {"base": 180, "rate": 0.045, "icon": "🪵"},
-        "River Sand (Ton)": {"base": 3900, "rate": 0.075, "icon": "🏖️"},
-        "Ballast (Ton)": {"base": 2700, "rate": 0.048, "icon": "🪨"},
-        "Building Bricks": {"base": 22, "rate": 0.035, "icon": "🧱"},
-        "Floor Tiles (m²)": {"base": 1450, "rate": 0.050, "icon": "✨"}
+        "Cement (50kg bag)": {"base": 780, "rate": 0.052, "icon": "🧱", "color": "#003366"},
+        "Steel Bars (12mm)": {"base": 1550, "rate": 0.068, "icon": "🔩", "color": "#D4AF37"},
+        "Iron Sheets (G30)": {"base": 1280, "rate": 0.055, "icon": "🏗️", "color": "#10b981"},
+        "Timber (Cypress)": {"base": 180, "rate": 0.045, "icon": "🪵", "color": "#ef4444"},
+        "River Sand (Ton)": {"base": 3900, "rate": 0.075, "icon": "🏖️", "color": "#f59e0b"},
+        "Ballast (Ton)": {"base": 2700, "rate": 0.048, "icon": "🪨", "color": "#6366f1"},
+        "Building Bricks": {"base": 22, "rate": 0.035, "icon": "🧱", "color": "#8b5cf6"},
+        "Floor Tiles (m²)": {"base": 1450, "rate": 0.050, "icon": "✨", "color": "#ec4899"}
     }
     
     forecast_data = {"Year": years}
     for name, config in materials_config.items():
-        # Calculating the 10-year projection
         forecast_data[name] = [config["base"] * (1 + config["rate"])**i for i in range(len(years))]
         
     return pd.DataFrame(forecast_data), materials_config
 
-# --- UI SECTION: MATERIAL FORECAST ---
-st.markdown('<div id="material-forecast" style="padding-top: 50px;"></div>', unsafe_allow_html=True)
-st.header("📈 10-Year Material Price Intelligence")
-st.markdown("<h3>AI-driven price projections based on historical volatility and Kenyan market indices (2025–2035).</h3>", unsafe_allow_html=True)
-
 df_forecast, config = get_material_predictions()
 
-# 1. Interactive Time-Series Chart
-fig_mat = go.Figure()
-colors = ['#003366', '#D4AF37', '#10b981', '#ef4444', '#f59e0b', '#6366f1', '#8b5cf6', '#ec4899']
+# --- 3. UI SECTION: INTERACTIVE CARDS ---
+st.markdown('<div id="material-forecast" style="padding-top: 50px;"></div>', unsafe_allow_html=True)
+st.header("📈 10-Year Material Price Intelligence")
+st.write("Click on any material card below to view its specific 10-year forecast on the graph.")
 
-for i, (name, info) in enumerate(config.items()):
-    fig_mat.add_trace(go.Scatter(
-        x=df_forecast['Year'], 
-        y=df_forecast[name], 
-        name=name,
-        mode='lines+markers',
-        line=dict(width=3, color=colors[i % len(colors)]),
-        marker=dict(size=6)
-    ))
-
-fig_mat.update_layout(
-    title="Projected Material Inflation Trend",
-    xaxis_title="Forecast Year",
-    yaxis_title="Price (KES)",
-    template="plotly_white",
-    hovermode="x unified",
-    height=500,
-    margin=dict(l=0, r=0, t=50, b=0)
-)
-st.plotly_chart(fig_mat, use_container_with_width=True)
-
-# 2. Material Intelligence Grid
-st.subheader("Predictive Cost Breakdown")
+# Predictive Cost Breakdown Grid (Clickable)
 cols = st.columns(4)
-
 for i, (name, info) in enumerate(config.items()):
     with cols[i % 4]:
-        current_p = df_forecast[name].iloc[0]
+        # Logic: If the card/button is clicked, update the selected material
+        if st.button(f"{info['icon']} {name}", key=f"btn_{name}", use_container_width=True):
+            st.session_state.selected_material = name
+        
+        # UI Styling for the "Selected" state
+        is_selected = st.session_state.selected_material == name
+        border_style = f"2px solid {info['color']}" if is_selected else "1px solid #e2e8f0"
+        bg_style = "#f8fafc" if is_selected else "white"
+        
         future_p = df_forecast[name].iloc[-1]
-        growth = ((future_p / current_p) - 1) * 100
+        growth = ((future_p / info['base']) - 1) * 100
         
         st.markdown(f"""
-            <div style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                <div style="font-size: 2rem; margin-bottom: 10px;">{info['icon']}</div>
-                <div style="font-weight: 700; color: #003366; font-size: 0.9rem;">{name}</div>
-                <div style="color: #64748b; font-size: 0.8rem; margin-top: 5px;">2035 Projection:</div>
-                <div style="font-size: 1.2rem; font-weight: 700; color: #D4AF37;">KES {future_p:,.0f}</div>
-                <div style="color: #10b981; font-size: 0.75rem; font-weight: 600; margin-top: 5px;">↑ {growth:.1f}% Estimated Growth</div>
+            <div style="background: {bg_style}; border: {border_style}; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+                <div style="color: #64748b; font-size: 0.75rem;">2035 Projection</div>
+                <div style="font-size: 1.1rem; font-weight: 700; color: {info['color']};">KES {future_p:,.0f}</div>
+                <div style="color: #10b981; font-size: 0.7rem; font-weight: 600;">↑ {growth:.1f}% Growth</div>
             </div>
         """, unsafe_allow_html=True)
 
-# 3. Data Export
+# --- 4. DYNAMIC FORECAST CHART ---
+selected = st.session_state.selected_material
+selected_color = config[selected]['color']
+
+st.subheader(f"Focus Forecast: {selected}")
+
+fig_mat = go.Figure()
+
+# Add the selected material line (Thick and Highlighted)
+fig_mat.add_trace(go.Scatter(
+    x=df_forecast['Year'], 
+    y=df_forecast[selected], 
+    name=selected,
+    mode='lines+markers+text',
+    text=[f"{v:,.0f}" if y % 2 == 0 else "" for y, v in zip(df_forecast['Year'], df_forecast[selected])],
+    textposition="top center",
+    line=dict(width=5, color=selected_color),
+    marker=dict(size=10, symbol='diamond')
+))
+
+# Add other materials as faint reference lines
+for name, info in config.items():
+    if name != selected:
+        fig_mat.add_trace(go.Scatter(
+            x=df_forecast['Year'], 
+            y=df_forecast[name], 
+            name=name,
+            mode='lines',
+            line=dict(width=1, color='#e2e8f0'),
+            showlegend=False,
+            hoverinfo='skip'
+        ))
+
+fig_mat.update_layout(
+    xaxis_title="Forecast Year",
+    yaxis_title="Price (KES)",
+    template="plotly_white",
+    hovermode="x",
+    height=450,
+    margin=dict(l=0, r=0, t=20, b=0)
+)
+st.plotly_chart(fig_mat, use_container_width=True)
+
+# 5. Data Export
 with st.expander("View Full Forecast Data Table"):
-    st.dataframe(df_forecast.style.format(lambda x: f"KES {x:,.2f}" if isinstance(x, (int, float)) and x > 2050 else x), use_container_width=True)
+    st.dataframe(df_forecast.style.format(lambda x: f"KES {x:,.2f}" if isinstance(x, (int, float)) and x > 2000 else x), use_container_width=True)
