@@ -139,7 +139,32 @@ st.markdown("""
         border-radius: 12px;
         text-align: center;
     }
+    .calc-card {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 25px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    /* Breakdown Item Styling */
+    .breakdown-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .item-label { color: #64748b; font-weight: 500; }
+    .item-value { color: #0f172a; font-weight: 700; }
     
+    /* Premium Total Box */
+    .total-box-v2 {
+        background: linear-gradient(135deg, #003366 0%, #004080 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 12px;
+        text-align: center;
+        margin-top: 20px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -247,34 +272,38 @@ st.markdown("---")
 # --- CALCULATOR LOGIC & UI ---
 st.markdown('<div id="expenses" style="padding-top: 50px;"></div>', unsafe_allow_html=True)
 st.header("🏗️ Construction Cost Calculator")
-st.write("Estimate your total build cost based on 2026 Kenyan material and labor indices.")
+st.write("Professional estimate based on 2026 Kenyan Building Indices.")
 
 with st.container():
-    col_input, col_output = st.columns([1, 1.2], gap="large")
+    col_input, col_output = st.columns([1, 1.3], gap="large")
 
     with col_input:
         st.subheader("Build Parameters")
         with st.container(border=True):
-            # Market rates (per m2) for 2026
+            # 1. Standard of Finish
             build_type = st.selectbox("Standard of Finish", 
                 ["Standard (Budget)", "Middle-Class", "Luxurious (Premium)"], 
-                help="Determines the quality of tiles, fittings, and cabinetry.")
+                index=1)
             
+            # 2. Square Meters
             sqm = st.number_input("Total Floor Area (sq. meters)", min_value=30, value=120, step=10)
-            levels = st.radio("Number of Floors", ["Single Storey (Bungalow)", "Multi-Storey (Maisonette)"], horizontal=True)
             
-            # Base rates mapping (KES per sqm)
+            # 3. NEW: Number of Floors
+            num_floors = st.select_slider("Number of Floors", options=[1, 2, 3, 4, 5], value=1)
+            
+            # LOGIC: Mapping Rates & Floor Multipliers
             rates = {"Standard (Budget)": 42000, "Middle-Class": 60000, "Luxurious (Premium)": 85000}
             base_rate = rates[build_type]
             
-            # Additional factor for multi-storey (structural slabs/stairs)
-            multiplier = 1.15 if "Multi-Storey" in levels else 1.0
-            total_estimate = sqm * base_rate * multiplier
+            # Floor multiplier: 1 floor=1.0, 2 floors=1.15 (slab), 3+ floors=1.25 (structural reinforcement)
+            floor_multiplier = 1.0 if num_floors == 1 else (1.15 if num_floors == 2 else 1.25)
+            
+            total_estimate = sqm * base_rate * floor_multiplier
 
     with col_output:
         st.subheader("Budget Breakdown")
         
-        # Breakdown calculation
+        # Breakdown calculation logic
         breakdown = {
             "Substructure (Foundation)": total_estimate * 0.18,
             "Walling & Superstructure": total_estimate * 0.32,
@@ -283,23 +312,34 @@ with st.container():
             "Electrical & Plumbing": total_estimate * 0.10
         }
 
-        # Display formatted cards
-        for item, cost in breakdown.items():
+        # Clearer Organizational View
+        with st.container(border=True):
+            # Summary Metrics Row
+            m1, m2 = st.columns(2)
+            m1.metric("Rate / m²", f"KES {base_rate:,.0f}")
+            m2.metric("Total Area", f"{sqm} sqm")
+            
+            st.markdown("<hr style='margin:10px 0;'>", unsafe_allow_html=True)
+            
+            # Detailed Items
+            for item, cost in breakdown.items():
+                st.markdown(f"""
+                    <div class="breakdown-row">
+                        <span class="item-label">{item}</span>
+                        <span class="item-value">KES {cost:,.0f}</span>
+                    </div>
+                """, unsafe_allow_html=True)
+
+            # Highlighted Total
             st.markdown(f"""
-                <div class="cost-card">
-                    <div class="cost-label">{item}</div>
-                    <div class="cost-value">KES {cost:,.0f}</div>
+                <div class="total-box-v2">
+                    <div style="font-size: 0.8rem; opacity: 0.8; letter-spacing: 1px;">PROJECTED TOTAL BUDGET</div>
+                    <div style="font-size: 2.2rem; font-weight: 800; margin: 5px 0;">KES {total_estimate:,.0f}</div>
+                    <div style="font-size: 0.75rem;">Includes {num_floors} level structural complexity</div>
                 </div>
             """, unsafe_allow_html=True)
 
-        # Total Highlight
-        st.markdown(f"""
-            <div class="total-box">
-                <div style="opacity: 0.8; font-size: 0.9rem;">PROJECTED TOTAL COST</div>
-                <div style="font-size: 2.5rem; font-weight: 800;">KES {total_estimate:,.0f}</div>
-                <div style="font-size: 0.8rem; margin-top: 10px;">*Estimate includes materials, labor, and basic site prelims.</div>
-            </div>
-        """, unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
 
 st.markdown("---")
 # --- LOCATION SECTION ---
