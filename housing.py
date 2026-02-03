@@ -342,22 +342,39 @@ with st.container():
 st.markdown("<br>", unsafe_allow_html=True)
 
 st.markdown("---")
+
 # --- LOCATION SECTION ---
 st.markdown('<div id="location"></div>', unsafe_allow_html=True)
 st.header("📍 Location-Based Pricing")
 st.write("Comparing property tiers across Kenyan urban centers.")
 
+# Create the data
 loc_data = pd.DataFrame({
     'City': ['Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret'],
     'Premium (KES)': [25e6, 18e6, 15e6, 12e6, 10e6],
     'Mid-Range (KES)': [12e6, 9e6, 7.5e6, 6e6, 5.5e6],
     'Affordable (KES)': [5e6, 4.5e6, 3.8e6, 3.2e6, 3e6]
 })
-st.dataframe(loc_data.style.format(lambda x: f"KES {x:,.0f}" if isinstance(x, (int, float)) else x), use_container_with_width=True)
 
-# --- FOOTER ---
-st.markdown("""
-    <div style="text-align: center; color: #94a3b8; padding: 40px 0;">
-        KenyaHomes Intelligence v3.0 | 2026 Housing Market Analysis
-    </div>
-""", unsafe_allow_html=True)
+# FIX: Apply formatting only to numeric columns to avoid the TypeError
+formatted_loc_data = loc_data.copy()
+numeric_cols = ['Premium (KES)', 'Mid-Range (KES)', 'Affordable (KES)']
+
+# Option 1: Using st.dataframe with column configuration (Recommended for Streamlit 1.20+)
+st.dataframe(
+    loc_data, 
+    column_config={
+        "Premium (KES)": st.column_config.NumberColumn("Premium (KES)", format="KES %d"),
+        "Mid-Range (KES)": st.column_config.NumberColumn("Mid-Range (KES)", format="KES %d"),
+        "Affordable (KES)": st.column_config.NumberColumn("Affordable (KES)", format="KES %d"),
+    },
+    use_container_width=True,
+    hide_index=True
+)
+
+# Option 2: If you prefer the Styler method (Fixed)
+# st.dataframe(loc_data.style.format({
+#     'Premium (KES)': 'KES {:,.0f}',
+#     'Mid-Range (KES)': 'KES {:,.0f}',
+#     'Affordable (KES)': 'KES {:,.0f}'
+# }), use_container_width=True)
