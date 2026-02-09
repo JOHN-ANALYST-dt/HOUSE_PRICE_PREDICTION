@@ -4,6 +4,13 @@ import numpy as np
 import joblib
 import plotly.graph_objects as go
 from datetime import datetime
+import os
+import pathlib
+
+
+# Base directory setup
+BASE_DIR = pathlib.Path(__file__).parent 
+CSS_PATH = os.path.join(BASE_DIR, 'style.css') 
 
 # --- CONFIGURATION & THEME ---
 st.set_page_config(page_title="KenyaHomes | Housing Intelligence", layout="wide")
@@ -19,152 +26,7 @@ st.markdown("""
     .main { padding: 0rem 5rem; }
     
     /* Professional Header Navigation */
-    .nav-header {
-        display: flex;
-        justify-content: center;
-        background-color: #ffffff;
-        padding: 15px 0;
-        border-bottom: 2px solid #D4AF37;
-        position: sticky;
-        top: 0;
-        z-index: 999;
-        margin-bottom: 30px;
-    }
-    .nav-item {
-        margin: 0 25px;
-        text-decoration: none;
-        color: #003366;
-        font-weight: 600;
-        font-size: 0.9rem;
-        transition: 0.3s;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    .nav-item:hover { color: #D4AF37; }
-
-    /* Hero Section */
-    .hero-container {
-        background: linear-gradient(135deg, #003366 0%, #002244 100%);
-        color: white; padding: 60px; border-radius: 15px;
-        text-align: center; margin-bottom: 40px;
-    }
     
-    .metric-card {
-        background: white; border: 1px solid #e2e8f0;
-        padding: 25px; border-radius: 12px; 
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        text-align: center;
-    }
-    .ai-banner {
-        background-color: #f8fafc;
-        text-align: center;
-        padding: 10px 0;
-        border-bottom: 2px solid #D4AF37;
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #1e293b;
-        letter-spacing: 0.5px;
-    }
-    .ai-dot {
-        height: 8px;
-        width: 8px;
-        background-color: #10b981;
-        border-radius: 50%;
-        display: inline-block;
-        margin-right: 8px;
-        box-shadow: 0 0 8px #10b981;
-    }
-    .section-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        color: #1a472a; /* Dark Greenish Tint from image */
-        font-family: 'Inter', sans-serif;
-        margin-bottom: 25px;
-    }
-    .section-header i {
-        font-size: 1.5rem;
-    }
-    .section-header h2 {
-        margin: 0;
-        font-size: 1.8rem;
-        font-weight: 600;
-    }
-    
-    /* Label with Icons styling */
-    .field-label {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: -15px; /* Adjusting for Streamlit widget spacing */
-        font-size: 0.95rem;
-    }
-    .field-label i {
-        color: #9ca3af; /* Muted icon color from image */
-        font-size: 1rem;
-    }
-            .calc-container {
-        background-color: #ffffff;
-        padding: 30px;
-        border-radius: 15px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-    .cost-card {
-        background: #f8fafc;
-        border-left: 5px solid #D4AF37;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 15px;
-    }
-    .cost-label {
-        color: #64748b;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-weight: 600;
-    }
-    .cost-value {
-        color: #003366;
-        font-size: 1.8rem;
-        font-weight: 700;
-        margin: 5px 0;
-    }
-    .total-box {
-        background: linear-gradient(135deg, #003366 0%, #002244 100%);
-        color: white;
-        padding: 30px;
-        border-radius: 12px;
-        text-align: center;
-    }
-    .calc-card {
-        background: #ffffff;
-        border-radius: 15px;
-        padding: 25px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    /* Breakdown Item Styling */
-    .breakdown-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 12px 0;
-        border-bottom: 1px solid #f1f5f9;
-    }
-    .item-label { color: #64748b; font-weight: 500; }
-    .item-value { color: #0f172a; font-weight: 700; }
-    
-    /* Premium Total Box */
-    .total-box-v2 {
-        background: linear-gradient(135deg, #003366 0%, #004080 100%);
-        color: white;
-        padding: 25px;
-        border-radius: 12px;
-        text-align: center;
-        margin-top: 20px;
-    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -214,7 +76,9 @@ st.markdown("""
 # --- PRICE PREDICTOR SECTION ---
 
 st.markdown('<div id="price-predictor"></div>', unsafe_allow_html=True)
-st.header("🏠 House Price Prediction")
+st.markdown ("""
+<h2 class="predict-h2">🏠 House Price Prediction</h2>
+             """,unsafe_allow_html=True)
 st.markdown("""
     <h2 class="predict-h2">Predict Your Dream Home's Price</h2>
     <h3 class="predict-h3">Enter your property requirements and get an accurate price prediction based on current market data and ML models.</h3>
@@ -267,15 +131,14 @@ with st.container(border=True):
         parking = st.selectbox("", ["1", "2", "3+"], index=None, placeholder="Select", key="park")
 
 st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("---")
 
 # --- CALCULATOR LOGIC & UI ---
 st.markdown('<div id="expenses" style="padding-top: 50px;"></div>', unsafe_allow_html=True)
 st.header("🏗️ Construction Cost Calculator")
 st.write("Professional estimate based on 2026 Kenyan Building Indices.")
 
-with st.container():
-    col_input, col_output = st.columns([1, 1.3], gap="large")
+with st.container(border=True):
+    col_input, col_output = st.columns([1, 1.3], gap="small")
 
     with col_input:
         st.subheader("Build Parameters")
@@ -341,7 +204,6 @@ with st.container():
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-st.markdown("---")
 # --- 1. INITIALIZE INTERACTIVE STATE ---
 # This tracks which material the user has clicked on
 if 'selected_material' not in st.session_state:
